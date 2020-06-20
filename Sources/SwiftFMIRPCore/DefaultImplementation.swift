@@ -23,6 +23,7 @@ class DefaultPlayer: Player {
     var name: String = "Default Player"
     var hero: Hero = DefaultHero()
     var isAlive: Bool  = true
+    var positionInMap: (Int, Int) = (0,0)
 }
 
 struct DefaultPlayerGenerator: PlayerGenerator {
@@ -82,11 +83,27 @@ class DefaultMap : Map {
     ]
 
     func availableMoves(player: Player) -> [PlayerMove] {
-        return []
+        let rowSize = maze[0].count
+        let columnSize = maze.count
+        var availableMoves: [PlayerMove] = [PlayerMove]()
+        if player.positionInMap.0 + 1 < rowSize && maze[player.positionInMap.0 + 1][player.positionInMap.1].type != .wall {
+            availableMoves.append(StandartPlayerMove(direction: .right))
+        }
+       if player.positionInMap.0 - 1 >= 0 && maze[player.positionInMap.0 - 1][player.positionInMap.1].type != .wall {
+           availableMoves.append(StandartPlayerMove(direction: .left))
+       }
+        if player.positionInMap.1 + 1 < columnSize && maze[player.positionInMap.0][player.positionInMap.1 + 1].type != .wall {
+            availableMoves.append(StandartPlayerMove(direction: .down))
+        }
+        if player.positionInMap.1 - 1 >= 0 && maze[player.positionInMap.0][player.positionInMap.1 - 1].type != .wall {
+            availableMoves.append(StandartPlayerMove(direction: .up))
+        }
+        
+        return availableMoves
     }
 
     func move(player: Player, move: PlayerMove) {
-       //ТОДО: редуцирай енергията на героя на играча с 1
+        //ТОДО: редуцирай енергията на героя на играча с 1
     }
     
 }
