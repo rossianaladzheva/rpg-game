@@ -66,6 +66,7 @@ enum MapTileType {
     case wall
     case teleport
     case rock
+    case player
 }
 
 protocol MapGenerator {

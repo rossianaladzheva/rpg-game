@@ -68,9 +68,9 @@ class DefaultMap : Map {
 
     var players: [Player]
     var maze: [[MapTile]] = [
-        [DefaultMapTile(type: .wall), DefaultMapTile(type: .wall), DefaultMapTile(type: .wall),DefaultMapTile(type: .wall), DefaultMapTile(type: .wall), DefaultMapTile(type: .wall), DefaultMapTile(type: .wall)],
+        [DefaultMapTile(type: .player), DefaultMapTile(type: .empty), DefaultMapTile(type: .wall),DefaultMapTile(type: .wall), DefaultMapTile(type: .wall), DefaultMapTile(type: .wall), DefaultMapTile(type: .wall)],
         
-        [DefaultMapTile(type: .wall), DefaultMapTile(type: .empty), DefaultMapTile(type: .wall),DefaultMapTile(type: .rock), DefaultMapTile(type: .chest), DefaultMapTile(type: .empty), DefaultMapTile(type: .wall)],
+        [DefaultMapTile(type: .wall), DefaultMapTile(type: .wall), DefaultMapTile(type: .wall),DefaultMapTile(type: .rock), DefaultMapTile(type: .chest), DefaultMapTile(type: .empty), DefaultMapTile(type: .wall)],
         
         [DefaultMapTile(type: .wall), DefaultMapTile(type: .empty), DefaultMapTile(type: .wall),DefaultMapTile(type: .wall), DefaultMapTile(type: .wall), DefaultMapTile(type: .wall), DefaultMapTile(type: .wall)],
         
@@ -78,25 +78,28 @@ class DefaultMap : Map {
         
         [DefaultMapTile(type: .wall), DefaultMapTile(type: .wall), DefaultMapTile(type: .wall),DefaultMapTile(type: .wall), DefaultMapTile(type: .wall), DefaultMapTile(type: .wall), DefaultMapTile(type: .wall)],
         
-        [DefaultMapTile(type: .wall), DefaultMapTile(type: .wall), DefaultMapTile(type: .wall),DefaultMapTile(type: .wall), DefaultMapTile(type: .wall), DefaultMapTile(type: .wall), DefaultMapTile(type: .wall)]
+        [DefaultMapTile(type: .wall), DefaultMapTile(type: .wall), DefaultMapTile(type: .wall),DefaultMapTile(type: .wall), DefaultMapTile(type: .wall), DefaultMapTile(type: .wall), DefaultMapTile(type: .teleport)]
         
     ]
 
+    //TODO
+    //"tell" the map to put a player on some position 
+    
     func availableMoves(player: Player) -> [PlayerMove] {
         let rowSize = maze[0].count
         let columnSize = maze.count
         var availableMoves: [PlayerMove] = [PlayerMove]()
-        if player.positionInMap.0 + 1 < rowSize && maze[player.positionInMap.0 + 1][player.positionInMap.1].type != .wall {
-            availableMoves.append(StandartPlayerMove(direction: .right))
-        }
-       if player.positionInMap.0 - 1 >= 0 && maze[player.positionInMap.0 - 1][player.positionInMap.1].type != .wall {
-           availableMoves.append(StandartPlayerMove(direction: .left))
-       }
-        if player.positionInMap.1 + 1 < columnSize && maze[player.positionInMap.0][player.positionInMap.1 + 1].type != .wall {
+        if player.positionInMap.0 + 1 < columnSize && maze[player.positionInMap.0 + 1][player.positionInMap.1].type != .wall {
             availableMoves.append(StandartPlayerMove(direction: .down))
         }
+       if player.positionInMap.0 - 1 >= 0 && maze[player.positionInMap.0 - 1][player.positionInMap.1].type != .wall {
+           availableMoves.append(StandartPlayerMove(direction: .up))
+       }
+        if player.positionInMap.1 + 1 < rowSize && maze[player.positionInMap.0][player.positionInMap.1 + 1].type != .wall {
+            availableMoves.append(StandartPlayerMove(direction: .right))
+        }
         if player.positionInMap.1 - 1 >= 0 && maze[player.positionInMap.0][player.positionInMap.1 - 1].type != .wall {
-            availableMoves.append(StandartPlayerMove(direction: .up))
+            availableMoves.append(StandartPlayerMove(direction: .left))
         }
         
         return availableMoves
@@ -104,19 +107,27 @@ class DefaultMap : Map {
 
     func move(player: Player, move: PlayerMove) {
         //ТОДО: редуцирай енергията на героя на играча с 1
-        if availableMoves(player: player).contains(move) {
+        availableMoves(player: player).forEach { (move) in
             if move.direction == .up {
-                player.positionInMap.0 = player.positionInMap.0 - 1
-                player.positionInMap.1 = player.positionInMap.1
+               // player.positionInMap.0 = player.positionInMap.0 - 1
+               // player.positionInMap.1 = player.positionInMap.1
+                maze[player.positionInMap.0 - 1][player.positionInMap.1].type = .player
+                maze[player.positionInMap.0][player.positionInMap.1].type = .empty
             } else if move.direction == .down {
-                player.positionInMap.0 = player.positionInMap.0 + 1
-                player.positionInMap.1 = player.positionInMap.1
+              //  player.positionInMap.0 = player.positionInMap.0 + 1
+              //  player.positionInMap.1 = player.positionInMap.1
+                maze[player.positionInMap.0 + 1][player.positionInMap.1].type = .player
+                maze[player.positionInMap.0][player.positionInMap.1].type = .empty
             } else if move.direction == .right {
-                player.positionInMap.0 = player.positionInMap.0
-                player.positionInMap.1 = player.positionInMap.1 + 1
+               // player.positionInMap.0 = player.positionInMap.0
+               // player.positionInMap.1 = player.positionInMap.1 + 1
+                maze[player.positionInMap.0][player.positionInMap.1 + 1].type = .player
+                maze[player.positionInMap.0][player.positionInMap.1].type = .empty
             } else if move.direction == .left {
-                player.positionInMap.0 = player.positionInMap.0
-                player.positionInMap.1 = player.positionInMap.1 - 1 
+               // player.positionInMap.0 = player.positionInMap.0
+               // player.positionInMap.1 = player.positionInMap.1 - 1
+                maze[player.positionInMap.0 - 1][player.positionInMap.1 - 1].type = .player
+                maze[player.positionInMap.0][player.positionInMap.1].type = .empty
             }
         }
     }
@@ -161,6 +172,8 @@ class DefaultMapRenderer: MapRenderer {
                 r += "  "
             case .wall:
                 r += "🧱"
+            case .player:
+                r += "🏃‍♂️"
             default:
                 //empty
                 r += " "
