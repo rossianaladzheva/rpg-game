@@ -33,7 +33,7 @@ struct DefaultPlayerGenerator: PlayerGenerator {
     }
     
     func generatePlayer(name: String) -> Player {
-        var player = DefaultPlayer()
+        let player = DefaultPlayer()
         player.name = name
         player.hero = heroGenerator.getRandom()
         return player
@@ -104,6 +104,21 @@ class DefaultMap : Map {
 
     func move(player: Player, move: PlayerMove) {
         //ТОДО: редуцирай енергията на героя на играча с 1
+        if availableMoves(player: player).contains(move) {
+            if move.direction == .up {
+                player.positionInMap.0 = player.positionInMap.0 - 1
+                player.positionInMap.1 = player.positionInMap.1
+            } else if move.direction == .down {
+                player.positionInMap.0 = player.positionInMap.0 + 1
+                player.positionInMap.1 = player.positionInMap.1
+            } else if move.direction == .right {
+                player.positionInMap.0 = player.positionInMap.0
+                player.positionInMap.1 = player.positionInMap.1 + 1
+            } else if move.direction == .left {
+                player.positionInMap.0 = player.positionInMap.0
+                player.positionInMap.1 = player.positionInMap.1 - 1 
+            }
+        }
     }
     
 }
