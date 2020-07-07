@@ -64,26 +64,38 @@ class DefaultMapTile: MapTile {
 class DefaultMap : Map {
     required init(players: [Player]) {
         self.players = players
+        self.maze = [[MapTile]]()
+        self.maze = generateMaze(for: players)
     }
 
     var players: [Player]
-    var maze: [[MapTile]] = [
-        [DefaultMapTile(type: .player), DefaultMapTile(type: .empty), DefaultMapTile(type: .wall),DefaultMapTile(type: .wall), DefaultMapTile(type: .wall), DefaultMapTile(type: .wall), DefaultMapTile(type: .wall)],
+    
+    var maze: [[MapTile]]
+   
+    private func generateMaze(for players: [Player]) -> [[MapTile]] {
+        var resultMaze: [[MapTile]] = [[MapTile]]()
+                var mapTileType: [MapTileType] = [MapTileType]()
+        let tileTypeWithoutPlayer: [MapTileType] = [.chest,.empty,.rock,.teleport,.wall]
+        let playerTiles: [MapTileType] = [.player1, .player2, .player3, .player4]
+        for _ in 0...35 - (players.count - 1)  {
+            mapTileType.append(tileTypeWithoutPlayer.randomElement()!)
+        }
+       
+        for i in 0...players.count - 1 {
+            mapTileType.append(playerTiles[i])
+        }
+        mapTileType.shuffle()
         
-        [DefaultMapTile(type: .wall), DefaultMapTile(type: .wall), DefaultMapTile(type: .wall),DefaultMapTile(type: .rock), DefaultMapTile(type: .chest), DefaultMapTile(type: .empty), DefaultMapTile(type: .wall)],
-        
-        [DefaultMapTile(type: .wall), DefaultMapTile(type: .empty), DefaultMapTile(type: .wall),DefaultMapTile(type: .wall), DefaultMapTile(type: .wall), DefaultMapTile(type: .wall), DefaultMapTile(type: .wall)],
-        
-        [DefaultMapTile(type: .wall), DefaultMapTile(type: .wall), DefaultMapTile(type: .wall),DefaultMapTile(type: .wall), DefaultMapTile(type: .wall), DefaultMapTile(type: .wall), DefaultMapTile(type: .wall)],
-        
-        [DefaultMapTile(type: .wall), DefaultMapTile(type: .wall), DefaultMapTile(type: .wall),DefaultMapTile(type: .wall), DefaultMapTile(type: .wall), DefaultMapTile(type: .wall), DefaultMapTile(type: .wall)],
-        
-        [DefaultMapTile(type: .wall), DefaultMapTile(type: .wall), DefaultMapTile(type: .wall),DefaultMapTile(type: .wall), DefaultMapTile(type: .wall), DefaultMapTile(type: .wall), DefaultMapTile(type: .teleport)]
-        
-    ]
-
-    //TODO
-    //"tell" the map to put a player on some position 
+        var rowMaze: [MapTile] = [MapTile]()
+        for j in 1...36 {
+            rowMaze.append(DefaultMapTile(type: mapTileType[j]))
+            if j % 6 == 0 {
+                resultMaze.append(rowMaze)
+                rowMaze = [MapTile]()
+            }
+        }
+        return resultMaze
+    }
     
     func availableMoves(player: Player) -> [PlayerMove] {
         let rowSize = maze[0].count
@@ -107,29 +119,29 @@ class DefaultMap : Map {
 
     func move(player: Player, move: PlayerMove) {
         //ТОДО: редуцирай енергията на героя на играча с 1
-        availableMoves(player: player).forEach { (move) in
-            if move.direction == .up {
-               // player.positionInMap.0 = player.positionInMap.0 - 1
-               // player.positionInMap.1 = player.positionInMap.1
-                maze[player.positionInMap.0 - 1][player.positionInMap.1].type = .player
-                maze[player.positionInMap.0][player.positionInMap.1].type = .empty
-            } else if move.direction == .down {
-              //  player.positionInMap.0 = player.positionInMap.0 + 1
-              //  player.positionInMap.1 = player.positionInMap.1
-                maze[player.positionInMap.0 + 1][player.positionInMap.1].type = .player
-                maze[player.positionInMap.0][player.positionInMap.1].type = .empty
-            } else if move.direction == .right {
-               // player.positionInMap.0 = player.positionInMap.0
-               // player.positionInMap.1 = player.positionInMap.1 + 1
-                maze[player.positionInMap.0][player.positionInMap.1 + 1].type = .player
-                maze[player.positionInMap.0][player.positionInMap.1].type = .empty
-            } else if move.direction == .left {
-               // player.positionInMap.0 = player.positionInMap.0
-               // player.positionInMap.1 = player.positionInMap.1 - 1
-                maze[player.positionInMap.0 - 1][player.positionInMap.1 - 1].type = .player
-                maze[player.positionInMap.0][player.positionInMap.1].type = .empty
-            }
-        }
+//        availableMoves(player: player).forEach { (move) in
+//            if move.direction == .up {
+//               // player.positionInMap.0 = player.positionInMap.0 - 1
+//               // player.positionInMap.1 = player.positionInMap.1
+//                maze[player.positionInMap.0 - 1][player.positionInMap.1].type = .player
+//                maze[player.positionInMap.0][player.positionInMap.1].type = .empty
+//            } else if move.direction == .down {
+//              //  player.positionInMap.0 = player.positionInMap.0 + 1
+//              //  player.positionInMap.1 = player.positionInMap.1
+//                maze[player.positionInMap.0 + 1][player.positionInMap.1].type = .player
+//                maze[player.positionInMap.0][player.positionInMap.1].type = .empty
+//            } else if move.direction == .right {
+//               // player.positionInMap.0 = player.positionInMap.0
+//               // player.positionInMap.1 = player.positionInMap.1 + 1
+//                maze[player.positionInMap.0][player.positionInMap.1 + 1].type = .player
+//                maze[player.positionInMap.0][player.positionInMap.1].type = .empty
+//            } else if move.direction == .left {
+//               // player.positionInMap.0 = player.positionInMap.0
+//               // player.positionInMap.1 = player.positionInMap.1 - 1
+//                maze[player.positionInMap.0 - 1][player.positionInMap.1 - 1].type = .player
+//                maze[player.positionInMap.0][player.positionInMap.1].type = .empty
+//            }
+    //    }
     }
     
 }
@@ -172,11 +184,17 @@ class DefaultMapRenderer: MapRenderer {
                 r += "  "
             case .wall:
                 r += "🧱"
-            case .player:
-                r += "🏃‍♂️"
+            case .player1:
+                r += "👮"
+            case .player2:
+                r += "👨‍🌾"
+            case .player3:
+                r += "👨‍⚕️"
+            case .player4:
+                r += "👩‍🚒"
             default:
                 //empty
-                r += " "
+                r += "  "
             }
         }
         

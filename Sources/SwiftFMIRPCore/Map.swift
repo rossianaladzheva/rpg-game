@@ -60,14 +60,18 @@ protocol MapTile {
     var state: String {get set}
 }
 
-enum MapTileType {
+enum MapTileType: CaseIterable {
     case empty
     case chest
     case wall
     case teleport
     case rock
-    case player
+    case player1
+    case player2
+    case player3
+    case player4
 }
+
 
 protocol MapGenerator {
     func generate(players:[Player]) -> Map
