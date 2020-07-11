@@ -1,7 +1,7 @@
 protocol Map {
     init(players: [Player])
     var players: [Player] {get}
-    var maze: [[MapTile]] {get}
+    var maze: [[DefaultMapTile]] {get}
 
     func availableMoves(player: Player) -> [PlayerMove]
     func move(player: Player, move: PlayerMove)
@@ -55,7 +55,7 @@ enum MapMoveDirection {
     case right
 }
 
-protocol MapTile {
+protocol MapTile: Equatable {
     var type: MapTileType {get set}
     var state: String {get set}
 }

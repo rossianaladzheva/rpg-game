@@ -53,7 +53,8 @@ class Game {
         while activePlayers(allPlayers: players).count > 1  {
             if var currentPlayer:Player = players[currentPlayerIndex] as? Player, currentPlayer.isAlive {
                 let playerNumber = currentPlayerIndex + 1
-                print("Сега е на ход играч №\(playerNumber) - \(currentPlayer.name)")
+                let playersAvatars = ["👮","👨‍🌾","👨‍⚕️","👩‍🚒"]
+                print("Сега е на ход играч №\(playerNumber) - \(currentPlayer.name)" + " с аватар: " + playersAvatars[currentPlayerIndex])
                 
                 ///команди от играча
                 var playerMoveIsNotFinished = true
