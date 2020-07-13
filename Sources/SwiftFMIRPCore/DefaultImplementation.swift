@@ -52,7 +52,7 @@ struct DefaultMapGenerator : MapGenerator {
 }
 class DefaultMapTile: MapTile {
     static func == (lhs: DefaultMapTile, rhs: DefaultMapTile) -> Bool {
-        return lhs.type == rhs.type
+        return lhs.type == rhs.type && (lhs.position.0 == rhs.position.0) && (lhs.position.1 == rhs.position.1)
     }
     
     var type: MapTileType
@@ -74,17 +74,17 @@ class DefaultMap : Map {
     
     var players: [Player]
     var maze = [[DefaultMapTile]]()
-  
+    
     private func generateMaze(for players: [Player]) -> [[DefaultMapTile]] {
         //матрицата ни ще е 6х6
         var resultMaze: [[DefaultMapTile]] = [[DefaultMapTile]]()
+        var mazeRow: [DefaultMapTile] = [DefaultMapTile]()
         var mapTileType: [MapTileType] = [MapTileType]()
-        var tileTypeWithoutPlayer: [MapTileType] = [.chest, .empty, .empty, .empty, .empty, .wall, .teleport, .empty, .wall, .wall, .chest, .teleport, .teleport, .empty, .empty, .chest, .empty, .rock, .wall, .empty, .empty, .empty, .chest, .teleport, .empty, .empty, .empty, .teleport, .chest, .wall, .rock, .empty, .teleport, .empty, .wall, .rock]
+        let tileTypeWithoutPlayer: [MapTileType] = [.chest, .empty, .empty, .empty, .empty, .wall, .teleport, .empty, .wall, .empty, .chest, .teleport, .teleport, .empty, .empty, .chest, .empty, .rock, .wall, .empty, .empty, .empty, .chest, .teleport, .empty, .empty, .empty, .teleport, .empty, .wall, .rock, .empty, .teleport, .empty, .wall, .rock]
         let playerTiles: [MapTileType] = [.player1, .player2, .player3, .player4]
         
         //взимаме си случайни плочки на брой 36 - бройката на играчите
-        tileTypeWithoutPlayer.shuffle()
-        for i in 0...tileTypeWithoutPlayer.count - (players.count - 1) {
+        for i in 0...((tileTypeWithoutPlayer.count - 1) - players.count) {
             mapTileType.append(tileTypeWithoutPlayer[i])
         }
         
@@ -93,16 +93,17 @@ class DefaultMap : Map {
             mapTileType.append(playerTiles[i])
         }
         
-        //разбъркваме отново, защото иначе, последните 2-4 плочки в матрицата ще са винаги тези на играчите
+        //разбъркваме, защото иначе, последните 2-4 плочки в матрицата ще са винаги тези на играчите
         mapTileType.shuffle()
-        
-        var rowMaze: [DefaultMapTile] = [DefaultMapTile]()
-        for j in 1...36 {
-            rowMaze.append(DefaultMapTile(type: mapTileType[j], position: (0,j)))
-            if j % 6 == 0 {
-                resultMaze.append(rowMaze)
-                rowMaze = [DefaultMapTile]()
+
+        var emojiArrayIndex = 0
+        for row in 0...5 {
+            for column in 0...5 {
+                mazeRow.append(DefaultMapTile(type: mapTileType[emojiArrayIndex], position: (row, column)))
+                emojiArrayIndex += 1
             }
+            resultMaze.append(mazeRow)
+            mazeRow = [DefaultMapTile]()
         }
         
         return resultMaze
@@ -111,29 +112,29 @@ class DefaultMap : Map {
     func getCurrentPosition(of player: Player) -> DefaultMapTile {
         var currentPlayerPosition = DefaultMapTile(type: .empty, position: (0,0))
         for i in 0..<maze.count {
-                  for j in 0..<maze[i].count {
-                      switch maze[i][j].type {
-                      case .player1:
-                          if player.name == "Player #1" {
-                              currentPlayerPosition = DefaultMapTile(type: .player1, position: (i,j))
-                          }
-                      case .player2:
-                          if player.name == "Player #2" {
-                              currentPlayerPosition = DefaultMapTile(type: .player1, position: (i,j))
-                          }
-                      case .player3:
-                          if player.name == "Player #3" {
-                              currentPlayerPosition = DefaultMapTile(type: .player1, position: (i,j))
-                          }
-                      case .player4:
-                          if player.name == "Player #4" {
-                              currentPlayerPosition = DefaultMapTile(type: .player1, position: (i,j))
-                          }
-                      default:
-                          break
-                      }
-                  }
-              }
+            for j in 0..<maze[i].count {
+                switch maze[i][j].type {
+                case .player1:
+                    if player.name == "Player #1" {
+                        currentPlayerPosition = DefaultMapTile(type: .player1, position: (i,j))
+                    }
+                case .player2:
+                    if player.name == "Player #2" {
+                        currentPlayerPosition = DefaultMapTile(type: .player2, position: (i,j))
+                    }
+                case .player3:
+                    if player.name == "Player #3" {
+                        currentPlayerPosition = DefaultMapTile(type: .player3, position: (i,j))
+                    }
+                case .player4:
+                    if player.name == "Player #4" {
+                        currentPlayerPosition = DefaultMapTile(type: .player4, position: (i,j))
+                    }
+                default:
+                    break
+                }
+            }
+        }
         return currentPlayerPosition
     }
     
@@ -172,31 +173,61 @@ class DefaultMap : Map {
     
     func move(player: Player, move: PlayerMove) {
         //ТОДО: редуцирай енергията на героя на играча с 1
-        //        availableMoves(player: player).forEach { (move) in
-        //            if move.direction == .up {
-        //               // player.positionInMap.0 = player.positionInMap.0 - 1
-        //               // player.positionInMap.1 = player.positionInMap.1
-        //                maze[player.positionInMap.0 - 1][player.positionInMap.1].type = .player
-        //                maze[player.positionInMap.0][player.positionInMap.1].type = .empty
-        //            } else if move.direction == .down {
-        //              //  player.positionInMap.0 = player.positionInMap.0 + 1
-        //              //  player.positionInMap.1 = player.positionInMap.1
-        //                maze[player.positionInMap.0 + 1][player.positionInMap.1].type = .player
-        //                maze[player.positionInMap.0][player.positionInMap.1].type = .empty
-        //            } else if move.direction == .right {
-        //               // player.positionInMap.0 = player.positionInMap.0
-        //               // player.positionInMap.1 = player.positionInMap.1 + 1
-        //                maze[player.positionInMap.0][player.positionInMap.1 + 1].type = .player
-        //                maze[player.positionInMap.0][player.positionInMap.1].type = .empty
-        //            } else if move.direction == .left {
-        //               // player.positionInMap.0 = player.positionInMap.0
-        //               // player.positionInMap.1 = player.positionInMap.1 - 1
-        //                maze[player.positionInMap.0 - 1][player.positionInMap.1 - 1].type = .player
-        //                maze[player.positionInMap.0][player.positionInMap.1].type = .empty
-        //            }
-        //    }
+        
+        //                    if move.direction == .up {
+        //                       // player.positionInMap.0 = player.positionInMap.0 - 1
+        //                       // player.positionInMap.1 = player.positionInMap.1
+        //                        maze[player.positionInMap.0 - 1][player.positionInMap.1].type = .player
+        //                        maze[player.positionInMap.0][player.positionInMap.1].type = .empty
+        //                    } else if move.direction == .down {
+        //                      //  player.positionInMap.0 = player.positionInMap.0 + 1
+        //                      //  player.positionInMap.1 = player.positionInMap.1
+        //                        maze[player.positionInMap.0 + 1][player.positionInMap.1].type = .player
+        //                        maze[player.positionInMap.0][player.positionInMap.1].type = .empty
+        //                    } else if move.direction == .right {
+        //                       // player.positionInMap.0 = player.positionInMap.0
+        //                       // player.positionInMap.1 = player.positionInMap.1 + 1
+        //                        maze[player.positionInMap.0][player.positionInMap.1 + 1].type = .player
+        //                        maze[player.positionInMap.0][player.positionInMap.1].type = .empty
+        //                    } else if move.direction == .left {
+        //                       // player.positionInMap.0 = player.positionInMap.0
+        //                       // player.positionInMap.1 = player.positionInMap.1 - 1
+        //                        maze[player.positionInMap.0 - 1][player.positionInMap.1 - 1].type = .player
+        //                        maze[player.positionInMap.0][player.positionInMap.1].type = .empty
+        
+        
+        
+        switch move.direction {
+        case .down:
+            availableMoves(player: player).forEach { (availableMove) in
+                if availableMove.direction == .down {
+                    
+                }
+            }
+        case .up:
+            availableMoves(player: player).forEach { (availableMove) in
+                if availableMove.direction == .down {
+                    
+                }
+            }
+        case .right:
+            availableMoves(player: player).forEach { (availableMove) in
+                if availableMove.direction == .down {
+                    
+                }
+            }
+        case .left:
+            availableMoves(player: player).forEach { (availableMove) in
+                if availableMove.direction == .down {
+                    
+                }
+            }
+        }
     }
     
+    private func swapTiles(tile1: DefaultMapTile, tile2: DefaultMapTile) {
+        
+    }
 }
 
 class DefaultFightGenerator : FightGenerator {

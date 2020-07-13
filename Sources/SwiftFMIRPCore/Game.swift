@@ -78,6 +78,7 @@ class Game {
                         }) {
                             //разпозната команда
                             map.move(player: currentPlayer, move: move)
+                            playerMoveIsNotFinished = false
                             
                         } else {
                             //иначе, провери за
