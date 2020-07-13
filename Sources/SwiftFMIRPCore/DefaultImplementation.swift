@@ -1,12 +1,12 @@
 struct DefaultHero: Hero {
-   var race: String  = "Random Race"
-
+    var race: String  = "Random Race"
+    
     var energy: Int = 5
     var lifePoitns: Int = 7
-
+    
     var weapon: Weapon?  = nil
     var armor: Armor? = nil
-
+    
 }
 
 struct NoArmor: Armor {
@@ -70,15 +70,15 @@ class DefaultMap : Map {
         self.maze = generateMaze(for: players)
         self.playersPositions = getPlayerPositions(in: maze)
     }
-
+    
     var players: [Player]
     var maze = [[DefaultMapTile]]()
     var playersPositions = [DefaultMapTile]()
-   
+    
     private func generateMaze(for players: [Player]) -> [[DefaultMapTile]] {
         //целта е матрицата да е 6х6
         var resultMaze: [[DefaultMapTile]] = [[DefaultMapTile]]()
-                var mapTileType: [MapTileType] = [MapTileType]()
+        var mapTileType: [MapTileType] = [MapTileType]()
         let tileTypeWithoutPlayer: [MapTileType] = [.chest,.empty,.rock,.teleport,.wall]
         let playerTiles: [MapTileType] = [.player1, .player2, .player3, .player4]
         
@@ -86,7 +86,7 @@ class DefaultMap : Map {
         for _ in 0...35 - (players.count - 1)  {
             mapTileType.append(tileTypeWithoutPlayer.randomElement()!)
         }
-       
+        
         //добавяме и плочките на играчите, които имаме
         for i in 0...players.count - 1 {
             mapTileType.append(playerTiles[i])
@@ -103,12 +103,14 @@ class DefaultMap : Map {
                 rowMaze = [DefaultMapTile]()
             }
         }
-
+        
         return resultMaze
     }
     
     private func getPlayerPositions(in maze: [[DefaultMapTile]]) -> [DefaultMapTile] {
         var playersPositions: [DefaultMapTile] = [DefaultMapTile]()
+        //Problem: this appends the first encountered emoji as the first element, so the order would be random
+        //TODO: find a better way to keep the positions
         maze.forEach { (row) in
             for tile in row {
                 switch tile.type {
@@ -125,88 +127,82 @@ class DefaultMap : Map {
                 }
             }
         }
+        
         return playersPositions
     }
-
+    
     func availableMoves(player: Player) -> [PlayerMove] {
         var currentPlayerPosition = DefaultMapTile(type: .empty)
-        for i in 1...4 {
-            if player.name == "Player #" + "\(i)" {
-                currentPlayerPosition = playersPositions[i-1]
+        for i in 0..<players.count {
+            if player === players[i] as AnyObject {
+                currentPlayerPosition = playersPositions[i]
             }
         }
-        
-        //aко tile-a не е в първия ред - може нагоре
-        //ако tile-a не е в последния ред - може надолу
-        //ако tile-a не е в последния стълб - може надясно
-        //ако tile-a не е в първия стълб - може наляво
-        //  let rowSize = maze[0].count
-        // let columnSize = maze.count
-         var availableMoves: [PlayerMove] = [PlayerMove]()
-        
-        if !(maze.first?.contains(currentPlayerPosition))! {
-            availableMoves.append(StandartPlayerMove(direction: .up))
-        }
-        
-        if !(maze.last?.contains(currentPlayerPosition))! {
-            availableMoves.append(StandartPlayerMove(direction: .down))
-        }
-        
-        maze.forEach { (row) in
-            if row.first != currentPlayerPosition {
-                availableMoves.append(StandartPlayerMove(direction: .left))
-            }
-            if row.last != currentPlayerPosition {
-                availableMoves.append(StandartPlayerMove(direction: .right))
-            }
-        }
-            
-       
-        
-//        if player.positionInMap.0 + 1 < columnSize && maze[player.positionInMap.0 + 1][player.positionInMap.1].type == .empty {
-//            availableMoves.append(StandartPlayerMove(direction: .down))
-//        }
-//       if player.positionInMap.0 - 1 >= 0 && maze[player.positionInMap.0 - 1][player.positionInMap.1].type == .empty {
-//           availableMoves.append(StandartPlayerMove(direction: .up))
-//       }
-//        if player.positionInMap.1 + 1 < rowSize && maze[player.positionInMap.0][player.positionInMap.1 + 1].type == .empty {
-//            availableMoves.append(StandartPlayerMove(direction: .right))
-//        }
-//        if player.positionInMap.1 - 1 >= 0 && maze[player.positionInMap.0][player.positionInMap.1 - 1].type == .empty {
-//            availableMoves.append(StandartPlayerMove(direction: .left))
-//        }
-        
-        return availableMoves
-        
-        
-        
-    }
+     
+        var availableMoves: [PlayerMove] = [PlayerMove]()
 
+        for i in 0..<maze.count {
+            for j in 0..<maze[i].count {
+                if maze[i][j] == currentPlayerPosition {
+                    if  i-1 >= 0 {
+                        if maze[i-1][j].type == .empty || maze[i-1][j].type == .teleport {
+                            availableMoves.append(StandartPlayerMove(direction: .up))
+                        }
+                    } else {
+                        break
+                    }
+                    if  i+1 <= maze.count {
+                        if maze[i+1][j].type == .empty || maze[i+1][j].type == .teleport {
+                           availableMoves.append(StandartPlayerMove(direction: .down))
+                        }
+                    } else {
+                        break
+                    }
+                    if j-1 >= 0 {
+                        if maze[i][j-1].type == .empty || maze[i][j-1].type == .teleport {
+                           availableMoves.append(StandartPlayerMove(direction: .left))
+                        }
+                    } else {
+                        break
+                    }
+                    if j+1 >= maze[0].count {
+                        if maze[i][j+1].type == .empty || maze[i][j+1].type == .teleport {
+                            availableMoves.append(StandartPlayerMove(direction: .right))
+                        }
+                    } else {
+                        break
+                    }
+                }
+            }
+        }
+        return availableMoves
+    }
+    
     func move(player: Player, move: PlayerMove) {
         //ТОДО: редуцирай енергията на героя на играча с 1
-//        availableMoves(player: player).forEach { (move) in
-//            if move.direction == .up {
-//               // player.positionInMap.0 = player.positionInMap.0 - 1
-//               // player.positionInMap.1 = player.positionInMap.1
-//                maze[player.positionInMap.0 - 1][player.positionInMap.1].type = .player
-//                maze[player.positionInMap.0][player.positionInMap.1].type = .empty
-//            } else if move.direction == .down {
-//              //  player.positionInMap.0 = player.positionInMap.0 + 1
-//              //  player.positionInMap.1 = player.positionInMap.1
-//                maze[player.positionInMap.0 + 1][player.positionInMap.1].type = .player
-//                maze[player.positionInMap.0][player.positionInMap.1].type = .empty
-//            } else if move.direction == .right {
-//               // player.positionInMap.0 = player.positionInMap.0
-//               // player.positionInMap.1 = player.positionInMap.1 + 1
-//                maze[player.positionInMap.0][player.positionInMap.1 + 1].type = .player
-//                maze[player.positionInMap.0][player.positionInMap.1].type = .empty
-//            } else if move.direction == .left {
-//               // player.positionInMap.0 = player.positionInMap.0
-//               // player.positionInMap.1 = player.positionInMap.1 - 1
-//                maze[player.positionInMap.0 - 1][player.positionInMap.1 - 1].type = .player
-//                maze[player.positionInMap.0][player.positionInMap.1].type = .empty
-//            }
-    //    }
+        //        availableMoves(player: player).forEach { (move) in
+        //            if move.direction == .up {
+        //               // player.positionInMap.0 = player.positionInMap.0 - 1
+        //               // player.positionInMap.1 = player.positionInMap.1
+        //                maze[player.positionInMap.0 - 1][player.positionInMap.1].type = .player
+        //                maze[player.positionInMap.0][player.positionInMap.1].type = .empty
+        //            } else if move.direction == .down {
+        //              //  player.positionInMap.0 = player.positionInMap.0 + 1
+        //              //  player.positionInMap.1 = player.positionInMap.1
+        //                maze[player.positionInMap.0 + 1][player.positionInMap.1].type = .player
+        //                maze[player.positionInMap.0][player.positionInMap.1].type = .empty
+        //            } else if move.direction == .right {
+        //               // player.positionInMap.0 = player.positionInMap.0
+        //               // player.positionInMap.1 = player.positionInMap.1 + 1
+        //                maze[player.positionInMap.0][player.positionInMap.1 + 1].type = .player
+        //                maze[player.positionInMap.0][player.positionInMap.1].type = .empty
+        //            } else if move.direction == .left {
+        //               // player.positionInMap.0 = player.positionInMap.0
+        //               // player.positionInMap.1 = player.positionInMap.1 - 1
+        //                maze[player.positionInMap.0 - 1][player.positionInMap.1 - 1].type = .player
+        //                maze[player.positionInMap.0][player.positionInMap.1].type = .empty
+        //            }
+        //    }
     }
     
 }
