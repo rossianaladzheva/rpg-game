@@ -111,24 +111,24 @@ class DefaultMap : Map {
     
     func getCurrentPosition(of player: Player) -> DefaultMapTile {
         var currentPlayerPosition = DefaultMapTile(type: .empty, position: (0,0))
-        for i in 0..<maze.count {
-            for j in 0..<maze[i].count {
-                switch maze[i][j].type {
+        for column in 0..<maze.count {
+            for row in 0..<maze[column].count {
+                switch maze[row][column].type {
                 case .player1:
                     if player.name == "Player #1" {
-                        currentPlayerPosition = DefaultMapTile(type: .player1, position: (i,j))
+                        currentPlayerPosition = DefaultMapTile(type: .player1, position: (row,column))
                     }
                 case .player2:
                     if player.name == "Player #2" {
-                        currentPlayerPosition = DefaultMapTile(type: .player2, position: (i,j))
+                        currentPlayerPosition = DefaultMapTile(type: .player2, position: (row,column))
                     }
                 case .player3:
                     if player.name == "Player #3" {
-                        currentPlayerPosition = DefaultMapTile(type: .player3, position: (i,j))
+                        currentPlayerPosition = DefaultMapTile(type: .player3, position: (row,column))
                     }
                 case .player4:
                     if player.name == "Player #4" {
-                        currentPlayerPosition = DefaultMapTile(type: .player4, position: (i,j))
+                        currentPlayerPosition = DefaultMapTile(type: .player4, position: (row,column))
                     }
                 default:
                     break
@@ -142,26 +142,26 @@ class DefaultMap : Map {
         var availableMoves: [PlayerMove] = [PlayerMove]()
         let currentPlayerPosition = getCurrentPosition(of: player)
         
-        for i in 0..<maze.count {
-            for j in 0..<maze[i].count {
-                if maze[i][j] == currentPlayerPosition {
-                    if  i-1 >= 0 {
-                        if maze[i-1][j].type == .empty || maze[i-1][j].type == .teleport {
+        for column in 0..<maze.count {
+            for row in 0..<maze[column].count {
+                if maze[row][column] == currentPlayerPosition {
+                    if  row-1 >= 0 {
+                        if maze[row-1][column].type == .empty || maze[row-1][column].type == .teleport {
                             availableMoves.append(StandartPlayerMove(direction: .up))
                         }
                     }
-                    if  i+1 < maze.count {
-                        if maze[i+1][j].type == .empty || maze[i+1][j].type == .teleport {
+                    if  row+1 < maze.count {
+                        if maze[row+1][column].type == .empty || maze[row+1][column].type == .teleport {
                             availableMoves.append(StandartPlayerMove(direction: .down))
                         }
                     }
-                    if j-1 >= 0 {
-                        if maze[i][j-1].type == .empty || maze[i][j-1].type == .teleport {
+                    if column-1 >= 0 {
+                        if maze[row][column-1].type == .empty || maze[row][column-1].type == .teleport {
                             availableMoves.append(StandartPlayerMove(direction: .left))
                         }
                     }
-                    if j+1 < maze[0].count {
-                        if maze[i][j+1].type == .empty || maze[i][j+1].type == .teleport {
+                    if column+1 < maze[0].count {
+                        if maze[row][column+1].type == .empty || maze[row][column+1].type == .teleport {
                             availableMoves.append(StandartPlayerMove(direction: .right))
                         }
                     } 
@@ -172,61 +172,51 @@ class DefaultMap : Map {
     }
     
     func move(player: Player, move: PlayerMove) {
-        //ТОДО: редуцирай енергията на героя на играча с 1
         
-        //                    if move.direction == .up {
-        //                       // player.positionInMap.0 = player.positionInMap.0 - 1
-        //                       // player.positionInMap.1 = player.positionInMap.1
-        //                        maze[player.positionInMap.0 - 1][player.positionInMap.1].type = .player
-        //                        maze[player.positionInMap.0][player.positionInMap.1].type = .empty
-        //                    } else if move.direction == .down {
-        //                      //  player.positionInMap.0 = player.positionInMap.0 + 1
-        //                      //  player.positionInMap.1 = player.positionInMap.1
-        //                        maze[player.positionInMap.0 + 1][player.positionInMap.1].type = .player
-        //                        maze[player.positionInMap.0][player.positionInMap.1].type = .empty
-        //                    } else if move.direction == .right {
-        //                       // player.positionInMap.0 = player.positionInMap.0
-        //                       // player.positionInMap.1 = player.positionInMap.1 + 1
-        //                        maze[player.positionInMap.0][player.positionInMap.1 + 1].type = .player
-        //                        maze[player.positionInMap.0][player.positionInMap.1].type = .empty
-        //                    } else if move.direction == .left {
-        //                       // player.positionInMap.0 = player.positionInMap.0
-        //                       // player.positionInMap.1 = player.positionInMap.1 - 1
-        //                        maze[player.positionInMap.0 - 1][player.positionInMap.1 - 1].type = .player
-        //                        maze[player.positionInMap.0][player.positionInMap.1].type = .empty
-        
-        
-        
-        switch move.direction {
-        case .down:
-            availableMoves(player: player).forEach { (availableMove) in
-                if availableMove.direction == .down {
-                    
+        let playerPosition = getCurrentPosition(of: player)
+       for column in 0..<maze.count {
+        for row in 0..<maze[column].count {
+            if maze[row][column] == playerPosition {
+            switch move.direction {
+                case .down:
+                    availableMoves(player: player).forEach { (availableMove) in
+                        if availableMove.direction == .down {
+                            let positionDown = maze[row + 1][column]
+                            swapTiles(tile1: playerPosition, tile2: positionDown)
+                        }
+                    }
+                case .up:
+                    availableMoves(player: player).forEach { (availableMove) in
+                        if availableMove.direction == .up {
+                            let positionUp = maze[row - 1][column]
+                            swapTiles(tile1: playerPosition, tile2: positionUp)
+                        }
+                    }
+                case .right:
+                    availableMoves(player: player).forEach { (availableMove) in
+                        if availableMove.direction == .right {
+                            let positionRight = maze[row][column + 1]
+                            swapTiles(tile1: playerPosition, tile2: positionRight)
+                        }
+                    }
+                case .left:
+                    availableMoves(player: player).forEach { (availableMove) in
+                        if availableMove.direction == .left {
+                            let positionLeft = maze[row][column - 1]
+                            swapTiles(tile1: playerPosition, tile2: positionLeft)
+                        }
+                    }
                 }
             }
-        case .up:
-            availableMoves(player: player).forEach { (availableMove) in
-                if availableMove.direction == .down {
-                    
-                }
-            }
-        case .right:
-            availableMoves(player: player).forEach { (availableMove) in
-                if availableMove.direction == .down {
-                    
-                }
-            }
-        case .left:
-            availableMoves(player: player).forEach { (availableMove) in
-                if availableMove.direction == .down {
-                    
-                }
             }
         }
+      //ТОДО: редуцирай енергията на героя на играча с 1
     }
-    
-    private func swapTiles(tile1: DefaultMapTile, tile2: DefaultMapTile) {
         
+    private func swapTiles(tile1: DefaultMapTile, tile2: DefaultMapTile) {
+        //Problem: it moves the player emoji but doesn't empty the other one
+        swap(&tile1.position, &tile2.position)
+        swap(&tile1.type, &tile2.type)
     }
 }
 
