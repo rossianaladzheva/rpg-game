@@ -79,12 +79,13 @@ class DefaultMap : Map {
         //матрицата ни ще е 6х6
         var resultMaze: [[DefaultMapTile]] = [[DefaultMapTile]]()
         var mapTileType: [MapTileType] = [MapTileType]()
-        let tileTypeWithoutPlayer: [MapTileType] = [.chest,.empty,.rock,.teleport,.wall]
+        var tileTypeWithoutPlayer: [MapTileType] = [.chest, .empty, .empty, .empty, .empty, .wall, .teleport, .empty, .wall, .wall, .chest, .teleport, .teleport, .empty, .empty, .chest, .empty, .rock, .wall, .empty, .empty, .empty, .chest, .teleport, .empty, .empty, .empty, .teleport, .chest, .wall, .rock, .empty, .teleport, .empty, .wall, .rock]
         let playerTiles: [MapTileType] = [.player1, .player2, .player3, .player4]
         
         //взимаме си случайни плочки на брой 36 - бройката на играчите
-        for _ in 0...35 - (players.count - 1)  {
-            mapTileType.append(tileTypeWithoutPlayer.randomElement()!)
+        tileTypeWithoutPlayer.shuffle()
+        for i in 0...tileTypeWithoutPlayer.count - (players.count - 1) {
+            mapTileType.append(tileTypeWithoutPlayer[i])
         }
         
         //добавяме и плочките на играчите, които имаме
@@ -92,7 +93,7 @@ class DefaultMap : Map {
             mapTileType.append(playerTiles[i])
         }
         
-        //разбъркваме отново, защото иначе, последните 2-4 плочки ще са винаги на играчите
+        //разбъркваме отново, защото иначе, последните 2-4 плочки в матрицата ще са винаги тези на играчите
         mapTileType.shuffle()
         
         var rowMaze: [DefaultMapTile] = [DefaultMapTile]()
