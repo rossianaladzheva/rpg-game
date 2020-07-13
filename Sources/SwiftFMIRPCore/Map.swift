@@ -58,6 +58,7 @@ enum MapMoveDirection {
 protocol MapTile: Equatable {
     var type: MapTileType {get set}
     var state: String {get set}
+    var position: (Int,Int) {get set}
 }
 
 enum MapTileType: CaseIterable {

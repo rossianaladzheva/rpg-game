@@ -57,9 +57,11 @@ class DefaultMapTile: MapTile {
     
     var type: MapTileType
     var state: String
+    var position: (Int,Int)
     
-    init(type: MapTileType) {
+    init(type: MapTileType, position: (Int,Int)) {
         self.type = type
+        self.position = position
         state = ""
     }
 }
@@ -68,15 +70,13 @@ class DefaultMap : Map {
     required init(players: [Player]) {
         self.players = players
         self.maze = generateMaze(for: players)
-        self.playersPositions = getPlayerPositions(in: maze)
     }
     
     var players: [Player]
     var maze = [[DefaultMapTile]]()
-    var playersPositions = [DefaultMapTile]()
-    
+  
     private func generateMaze(for players: [Player]) -> [[DefaultMapTile]] {
-        //целта е матрицата да е 6х6
+        //матрицата ни ще е 6х6
         var resultMaze: [[DefaultMapTile]] = [[DefaultMapTile]]()
         var mapTileType: [MapTileType] = [MapTileType]()
         let tileTypeWithoutPlayer: [MapTileType] = [.chest,.empty,.rock,.teleport,.wall]
@@ -97,7 +97,7 @@ class DefaultMap : Map {
         
         var rowMaze: [DefaultMapTile] = [DefaultMapTile]()
         for j in 1...36 {
-            rowMaze.append(DefaultMapTile(type: mapTileType[j]))
+            rowMaze.append(DefaultMapTile(type: mapTileType[j], position: (0,j)))
             if j % 6 == 0 {
                 resultMaze.append(rowMaze)
                 rowMaze = [DefaultMapTile]()
@@ -107,40 +107,39 @@ class DefaultMap : Map {
         return resultMaze
     }
     
-    private func getPlayerPositions(in maze: [[DefaultMapTile]]) -> [DefaultMapTile] {
-        var playersPositions: [DefaultMapTile] = [DefaultMapTile]()
-        //Problem: this appends the first encountered emoji as the first element, so the order would be random
-        //TODO: find a better way to keep the positions
-        maze.forEach { (row) in
-            for tile in row {
-                switch tile.type {
-                case .player1:
-                    playersPositions.append(tile)
-                case .player2:
-                    playersPositions.append(tile)
-                case .player3:
-                    playersPositions.append(tile)
-                case .player4:
-                    playersPositions.append(tile)
-                default:
-                    break
-                }
-            }
-        }
-        
-        return playersPositions
+    func getCurrentPosition(of player: Player) -> DefaultMapTile {
+        var currentPlayerPosition = DefaultMapTile(type: .empty, position: (0,0))
+        for i in 0..<maze.count {
+                  for j in 0..<maze[i].count {
+                      switch maze[i][j].type {
+                      case .player1:
+                          if player.name == "Player #1" {
+                              currentPlayerPosition = DefaultMapTile(type: .player1, position: (i,j))
+                          }
+                      case .player2:
+                          if player.name == "Player #2" {
+                              currentPlayerPosition = DefaultMapTile(type: .player1, position: (i,j))
+                          }
+                      case .player3:
+                          if player.name == "Player #3" {
+                              currentPlayerPosition = DefaultMapTile(type: .player1, position: (i,j))
+                          }
+                      case .player4:
+                          if player.name == "Player #4" {
+                              currentPlayerPosition = DefaultMapTile(type: .player1, position: (i,j))
+                          }
+                      default:
+                          break
+                      }
+                  }
+              }
+        return currentPlayerPosition
     }
     
     func availableMoves(player: Player) -> [PlayerMove] {
-        var currentPlayerPosition = DefaultMapTile(type: .empty)
-        for i in 0..<players.count {
-            if player === players[i] as AnyObject {
-                currentPlayerPosition = playersPositions[i]
-            }
-        }
-     
         var availableMoves: [PlayerMove] = [PlayerMove]()
-
+        let currentPlayerPosition = getCurrentPosition(of: player)
+        
         for i in 0..<maze.count {
             for j in 0..<maze[i].count {
                 if maze[i][j] == currentPlayerPosition {
@@ -148,30 +147,22 @@ class DefaultMap : Map {
                         if maze[i-1][j].type == .empty || maze[i-1][j].type == .teleport {
                             availableMoves.append(StandartPlayerMove(direction: .up))
                         }
-                    } else {
-                        break
                     }
-                    if  i+1 <= maze.count {
+                    if  i+1 < maze.count {
                         if maze[i+1][j].type == .empty || maze[i+1][j].type == .teleport {
-                           availableMoves.append(StandartPlayerMove(direction: .down))
+                            availableMoves.append(StandartPlayerMove(direction: .down))
                         }
-                    } else {
-                        break
                     }
                     if j-1 >= 0 {
                         if maze[i][j-1].type == .empty || maze[i][j-1].type == .teleport {
-                           availableMoves.append(StandartPlayerMove(direction: .left))
+                            availableMoves.append(StandartPlayerMove(direction: .left))
                         }
-                    } else {
-                        break
                     }
-                    if j+1 >= maze[0].count {
+                    if j+1 < maze[0].count {
                         if maze[i][j+1].type == .empty || maze[i][j+1].type == .teleport {
                             availableMoves.append(StandartPlayerMove(direction: .right))
                         }
-                    } else {
-                        break
-                    }
+                    } 
                 }
             }
         }
