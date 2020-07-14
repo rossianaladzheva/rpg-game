@@ -64,6 +64,7 @@ protocol MapTile: Equatable {
 enum MapTileType: CaseIterable {
     case empty
     case chest
+    case openChest
     case wall
     case teleport
     case rock

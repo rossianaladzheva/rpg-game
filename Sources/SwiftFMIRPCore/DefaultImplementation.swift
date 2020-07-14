@@ -105,30 +105,29 @@ class DefaultMap : Map {
             resultMaze.append(mazeRow)
             mazeRow = [DefaultMapTile]()
         }
-        
         return resultMaze
     }
     
     func getCurrentPosition(of player: Player) -> DefaultMapTile {
         var currentPlayerPosition = DefaultMapTile(type: .empty, position: (0,0))
-        for column in 0..<maze.count {
-            for row in 0..<maze[column].count {
-                switch maze[row][column].type {
+        for row in maze {
+            for tile in row {
+                switch tile.type {
                 case .player1:
                     if player.name == "Player #1" {
-                        currentPlayerPosition = maze[row][column]
+                        currentPlayerPosition = tile
                     }
                 case .player2:
                     if player.name == "Player #2" {
-                        currentPlayerPosition = maze[row][column]
+                        currentPlayerPosition = tile
                     }
                 case .player3:
                     if player.name == "Player #3" {
-                        currentPlayerPosition = maze[row][column]
+                        currentPlayerPosition = tile
                     }
                 case .player4:
                     if player.name == "Player #4" {
-                        currentPlayerPosition = maze[row][column]
+                        currentPlayerPosition = tile
                     }
                 default:
                     break
@@ -146,22 +145,22 @@ class DefaultMap : Map {
             for row in 0..<maze[column].count {
                 if maze[row][column] == currentPlayerPosition {
                     if  row-1 >= 0 {
-                        if maze[row-1][column].type == .empty || maze[row-1][column].type == .teleport {
+                        if maze[row-1][column].type != .rock && maze[row-1][column].type != .wall && maze[row-1][column].type != .openChest {
                             availableMoves.append(StandartPlayerMove(direction: .up))
                         }
                     }
                     if  row+1 < maze.count {
-                        if maze[row+1][column].type == .empty || maze[row+1][column].type == .teleport {
+                        if maze[row+1][column].type != .rock && maze[row+1][column].type != .wall && maze[row+1][column].type != .openChest {
                             availableMoves.append(StandartPlayerMove(direction: .down))
                         }
                     }
                     if column-1 >= 0 {
-                        if maze[row][column-1].type == .empty || maze[row][column-1].type == .teleport {
+                        if maze[row][column-1].type != .rock && maze[row][column-1].type != .wall && maze[row][column-1].type != .openChest {
                             availableMoves.append(StandartPlayerMove(direction: .left))
                         }
                     }
                     if column+1 < maze[0].count {
-                        if maze[row][column+1].type != .empty || maze[row][column+1].type == .teleport {
+                        if maze[row][column+1].type != .rock && maze[row][column+1].type != .wall && maze[row][column+1].type != .openChest {
                             availableMoves.append(StandartPlayerMove(direction: .right))
                         }
                     } 
@@ -169,6 +168,40 @@ class DefaultMap : Map {
             }
         }
         return availableMoves
+    }
+    
+    func executeMove(for player: Player, on tile: DefaultMapTile) {
+        let playerPosition = getCurrentPosition(of: player)
+        switch tile.type {
+        case .teleport:
+            teleport(player: player, from: tile)
+        case .chest:
+            tile.type = .openChest
+        case .empty:
+            swap(&playerPosition.type, &tile.type)
+            playerPosition.position = tile.position
+        case .player1, .player2, .player3, .player4:
+            break
+        default:
+            break
+        }
+    }
+    
+    func teleport(player: Player, from nearbyTeleport: DefaultMapTile) {
+        let playerPosition = getCurrentPosition(of: player)
+
+        for row in maze {
+            for tile in row {
+                //логиката е: телепортира се до някой друг телепорт, след което и двата телепорта изчезват
+                if tile.type == .teleport && tile.position != nearbyTeleport.position {
+                    tile.type = .empty
+                    swap(&playerPosition.type, &tile.type)
+                    playerPosition.position = tile.position
+                    nearbyTeleport.type = .empty
+                    return
+                }
+            }
+        }
     }
     
     func move(player: Player, move: PlayerMove) {
@@ -181,32 +214,28 @@ class DefaultMap : Map {
                     availableMoves(player: player).forEach { (availableMove) in
                         if availableMove.direction == .down {
                             let positionDown = maze[row + 1][column]
-                            swap(&playerPosition.type, &positionDown.type)
-                            playerPosition.position = (row + 1, column)
+                         executeMove(for: player, on: positionDown)
                         }
                     }
                 case .up:
                     availableMoves(player: player).forEach { (availableMove) in
                         if availableMove.direction == .up {
                             let positionUp = maze[row - 1][column]
-                            swap(&playerPosition.type, &positionUp.type)
-                            playerPosition.position = (row - 1 , column)
+                            executeMove(for: player, on: positionUp)
                         }
                     }
                 case .right:
                     availableMoves(player: player).forEach { (availableMove) in
                         if availableMove.direction == .right {
                             let positionRight = maze[row][column + 1]
-                            swap(&playerPosition.type, &positionRight.type)
-                            playerPosition.position = (row, column + 1)
+                            executeMove(for: player, on: positionRight)
                         }
                     }
                 case .left:
                     availableMoves(player: player).forEach { (availableMove) in
                         if availableMove.direction == .left {
                             let positionLeft = maze[row][column - 1]
-                            swap(&playerPosition.type, &positionLeft.type)
-                            playerPosition.position = (row, column - 1)
+                            executeMove(for: player, on: positionLeft)
                         }
                     }
                 }
@@ -247,6 +276,8 @@ class DefaultMapRenderer: MapRenderer {
             switch tile.type {
             case .chest:
                 r += "📦"
+            case .openChest:
+                r += "🗃"
             case .rock:
                 r += "🗿"
             case .teleport:
