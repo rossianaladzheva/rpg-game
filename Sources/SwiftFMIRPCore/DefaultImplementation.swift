@@ -128,7 +128,7 @@ class DefaultMap : Map {
                     }
                 case .player4:
                     if player.name == "Player #4" {
-                        currentPlayerPosition = maze[row][column] 
+                        currentPlayerPosition = maze[row][column]
                     }
                 default:
                     break
@@ -161,7 +161,7 @@ class DefaultMap : Map {
                         }
                     }
                     if column+1 < maze[0].count {
-                        if maze[row][column+1].type == .empty || maze[row][column+1].type == .teleport {
+                        if maze[row][column+1].type != .empty || maze[row][column+1].type == .teleport {
                             availableMoves.append(StandartPlayerMove(direction: .right))
                         }
                     } 
@@ -256,16 +256,13 @@ class DefaultMapRenderer: MapRenderer {
             case .wall:
                 r += "🧱"
             case .player1:
-                r += "👮"
+                r += "🦸‍♂️"
             case .player2:
-                r += "👨‍🌾"
+                r += "🦹‍♀️"
             case .player3:
-                r += "👨‍⚕️"
+                r += "🧝‍♀️"
             case .player4:
-                r += "👩‍🚒"
-            default:
-                //empty
-                r += "  "
+                r += "🧙‍♂️"
             }
         }
         
