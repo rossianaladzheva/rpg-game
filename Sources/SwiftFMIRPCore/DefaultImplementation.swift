@@ -116,19 +116,19 @@ class DefaultMap : Map {
                 switch maze[row][column].type {
                 case .player1:
                     if player.name == "Player #1" {
-                        currentPlayerPosition = DefaultMapTile(type: .player1, position: (row,column))
+                        currentPlayerPosition = maze[row][column]
                     }
                 case .player2:
                     if player.name == "Player #2" {
-                        currentPlayerPosition = DefaultMapTile(type: .player2, position: (row,column))
+                        currentPlayerPosition = maze[row][column]
                     }
                 case .player3:
                     if player.name == "Player #3" {
-                        currentPlayerPosition = DefaultMapTile(type: .player3, position: (row,column))
+                        currentPlayerPosition = maze[row][column]
                     }
                 case .player4:
                     if player.name == "Player #4" {
-                        currentPlayerPosition = DefaultMapTile(type: .player4, position: (row,column))
+                        currentPlayerPosition = maze[row][column] 
                     }
                 default:
                     break
@@ -172,7 +172,6 @@ class DefaultMap : Map {
     }
     
     func move(player: Player, move: PlayerMove) {
-        
         let playerPosition = getCurrentPosition(of: player)
        for column in 0..<maze.count {
         for row in 0..<maze[column].count {
@@ -182,28 +181,32 @@ class DefaultMap : Map {
                     availableMoves(player: player).forEach { (availableMove) in
                         if availableMove.direction == .down {
                             let positionDown = maze[row + 1][column]
-                            swapTiles(tile1: playerPosition, tile2: positionDown)
+                            swap(&playerPosition.type, &positionDown.type)
+                            playerPosition.position = (row + 1, column)
                         }
                     }
                 case .up:
                     availableMoves(player: player).forEach { (availableMove) in
                         if availableMove.direction == .up {
                             let positionUp = maze[row - 1][column]
-                            swapTiles(tile1: playerPosition, tile2: positionUp)
+                            swap(&playerPosition.type, &positionUp.type)
+                            playerPosition.position = (row - 1 , column)
                         }
                     }
                 case .right:
                     availableMoves(player: player).forEach { (availableMove) in
                         if availableMove.direction == .right {
                             let positionRight = maze[row][column + 1]
-                            swapTiles(tile1: playerPosition, tile2: positionRight)
+                            swap(&playerPosition.type, &positionRight.type)
+                            playerPosition.position = (row, column + 1)
                         }
                     }
                 case .left:
                     availableMoves(player: player).forEach { (availableMove) in
                         if availableMove.direction == .left {
                             let positionLeft = maze[row][column - 1]
-                            swapTiles(tile1: playerPosition, tile2: positionLeft)
+                            swap(&playerPosition.type, &positionLeft.type)
+                            playerPosition.position = (row, column - 1)
                         }
                     }
                 }
@@ -211,12 +214,6 @@ class DefaultMap : Map {
             }
         }
       //ТОДО: редуцирай енергията на героя на играча с 1
-    }
-        
-    private func swapTiles(tile1: DefaultMapTile, tile2: DefaultMapTile) {
-        //Problem: it moves the player emoji but doesn't empty the other one
-        swap(&tile1.position, &tile2.position)
-        swap(&tile1.type, &tile2.type)
     }
 }
 
