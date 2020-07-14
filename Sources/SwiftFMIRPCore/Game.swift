@@ -61,7 +61,7 @@ class Game {
                 repeat {
                     print("Моля въведете команда от възможните: ")
                     let availableMoves = map.availableMoves(player: currentPlayer)
-                    var allCommands = ["finish", "map"]
+                    var allCommands = ["finish", "map", "legend"]
                     if currentPlayer.isAlive {
                         allCommands.append("seppuku")
                         availableMoves.forEach { (move) in
@@ -95,6 +95,8 @@ class Game {
                                 currentPlayer.isAlive = false
                                 playerMoveIsNotFinished = false
                                 print("Вашият ход приключи.")
+                            case "legend":
+                                mapRenderer.renderMapLegend()
                             default:
                                 print("Непозната команда!")
                             }

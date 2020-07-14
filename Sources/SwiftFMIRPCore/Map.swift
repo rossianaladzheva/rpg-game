@@ -9,6 +9,7 @@ protocol Map {
 
 protocol MapRenderer {
     func render(map:Map)
+    func renderMapLegend()
 }
 
 protocol PlayerMove {

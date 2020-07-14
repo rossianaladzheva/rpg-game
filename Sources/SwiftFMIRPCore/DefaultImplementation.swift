@@ -108,7 +108,7 @@ class DefaultMap : Map {
         return resultMaze
     }
     
-    func getCurrentPosition(of player: Player) -> DefaultMapTile {
+   private func getCurrentPosition(of player: Player) -> DefaultMapTile {
         var currentPlayerPosition = DefaultMapTile(type: .empty, position: (0,0))
         for row in maze {
             for tile in row {
@@ -170,7 +170,7 @@ class DefaultMap : Map {
         return availableMoves
     }
     
-    func executeMove(for player: Player, on tile: DefaultMapTile) {
+   private func executeMove(for player: Player, on tile: DefaultMapTile) {
         let playerPosition = getCurrentPosition(of: player)
         switch tile.type {
         case .teleport:
@@ -190,7 +190,7 @@ class DefaultMap : Map {
         }
     }
     
-    func teleport(player: Player, from nearbyTeleport: DefaultMapTile) {
+    private func teleport(player: Player, from nearbyTeleport: DefaultMapTile) {
         let playerPosition = getCurrentPosition(of: player)
 
         for row in maze {
@@ -269,8 +269,6 @@ class DefaultMapRenderer: MapRenderer {
         for row in map.maze {
             self.renderMapRow(row: row)
         }
-        
-        renderMapLegend()
     }
     
     private func renderMapRow(row: [DefaultMapTile]) {
@@ -303,7 +301,7 @@ class DefaultMapRenderer: MapRenderer {
         print("\(r)")
     }
     
-    private func renderMapLegend() {
+    func renderMapLegend() {
         print("ЛЕГЕНДА")
         print("Полета 'скала̀: 🗿' и 'стена: 🧱' - няма позволен ход към полета от тези типове")
         print("Поле 'телепорт: 💿' - телепортира ви на друго поле тип 'телепорт', след което двата телепорта изчезват и не могат да бъдат използвани отново")
