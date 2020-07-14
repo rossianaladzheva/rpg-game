@@ -76,11 +76,11 @@ class DefaultMap : Map {
     var maze = [[DefaultMapTile]]()
     
     private func generateMaze(for players: [Player]) -> [[DefaultMapTile]] {
-        //матрицата ни ще е 6х6
+        //матрицата на картата е 6х6
         var resultMaze: [[DefaultMapTile]] = [[DefaultMapTile]]()
         var mazeRow: [DefaultMapTile] = [DefaultMapTile]()
         var mapTileType: [MapTileType] = [MapTileType]()
-        let tileTypeWithoutPlayer: [MapTileType] = [.chest, .empty, .empty, .empty, .empty, .wall, .teleport, .empty, .wall, .empty, .chest, .teleport, .teleport, .empty, .empty, .chest, .empty, .rock, .wall, .empty, .empty, .empty, .chest, .teleport, .empty, .empty, .empty, .teleport, .empty, .wall, .rock, .empty, .teleport, .empty, .wall, .rock]
+        let tileTypeWithoutPlayer: [MapTileType] = [.chest, .empty, .teleport, .empty, .empty, .empty, .wall, .teleport, .empty, .wall, .empty, .chest, .teleport, .teleport, .empty, .empty, .chest, .empty, .rock, .wall, .empty, .empty, .empty, .chest, .teleport, .empty, .empty, .empty, .teleport, .empty, .wall, .rock, .empty, .empty, .wall, .rock]
         let playerTiles: [MapTileType] = [.player1, .player2, .player3, .player4]
         
         //взимаме си случайни плочки на брой 36 - бройката на играчите
@@ -177,11 +177,14 @@ class DefaultMap : Map {
             teleport(player: player, from: tile)
         case .chest:
             tile.type = .openChest
+            print("Отворихте съндъка и придобихте ново оръжие 🗡")
+            //Armour functionality TBD
         case .empty:
             swap(&playerPosition.type, &tile.type)
             playerPosition.position = tile.position
         case .player1, .player2, .player3, .player4:
-            break
+            print("Започнахте битка.")
+            //Fight functionality TBD
         default:
             break
         }
@@ -192,7 +195,7 @@ class DefaultMap : Map {
 
         for row in maze {
             for tile in row {
-                //логиката е: телепортира се до някой друг телепорт, след което и двата телепорта изчезват
+                //логиката е играчът да се телепортира до някой друг телепорт, след което и двата телепорта изчезват
                 if tile.type == .teleport && tile.position != nearbyTeleport.position {
                     tile.type = .empty
                     swap(&playerPosition.type, &tile.type)
@@ -301,6 +304,12 @@ class DefaultMapRenderer: MapRenderer {
     }
     
     private func renderMapLegend() {
-        print("No map legend, yet!")
+        print("ЛЕГЕНДА")
+        print("Полета 'скала̀: 🗿' и 'стена: 🧱' - няма позволен ход към полета от тези типове")
+        print("Поле 'телепорт: 💿' - телепортира ви на друго поле тип 'телепорт', след което двата телепорта изчезват и не могат да бъдат използвани отново")
+        print("Поле 'съндък: 📦' - ако се направи ход към това поле, съндъкът се отваря и играчът получава оръжие")
+        print("Поле 'oтворен съндък: 🗃' - след като полето 'съндък' е било достъпено и отворено, вече няма позволен ход към това поле.")
+        print("Поле 'играч: 🦸‍♂️,🦹‍♀️,🧝‍♀️,🧙‍♂️' - полетата на активните играчи - ако се направи ход към друг играч, започва се битка.")
+        print("Поле 'празно:  ' - това поле дава право на движение - можете да придвижите играча си на него")
     }
 }
